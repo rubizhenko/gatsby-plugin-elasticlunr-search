@@ -43,11 +43,11 @@
     "eslint-config-prettier": "^3.6.0",
     "eslint-plugin-react": "^7.20.0",
     "prettier": "^1.19.1",
-    "prettier-eslint-cli": "^4.7.1",
-    "lunr-languages": "git+https://github.com/weixsong/lunr-languages.git"
+    "prettier-eslint-cli": "^4.7.1"
   },
   "dependencies": {
-    "elasticlunr": "^0.9.5"
+    "elasticlunr": "^0.9.5",
+    "lunr-languages": "git+https://github.com/weixsong/lunr-languages.git"
   },
   "peerDependencies": {
     "gatsby": ">3.0.0"
