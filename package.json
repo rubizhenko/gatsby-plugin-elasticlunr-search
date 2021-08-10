@@ -46,8 +46,7 @@
     "prettier-eslint-cli": "^4.7.1"
   },
   "dependencies": {
-    "elasticlunr": "^0.9.5",
-    "lunr-languages": "git+https://github.com/weixsong/lunr-languages.git"
+    "elasticlunr": "^0.9.5"
   },
   "peerDependencies": {
     "gatsby": ">3.0.0"
