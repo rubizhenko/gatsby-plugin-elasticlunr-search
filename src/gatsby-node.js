@@ -4,7 +4,24 @@ const elasticlunr = require(`elasticlunr`)
 
 require(`lunr-languages/lunr.stemmer.support`)(elasticlunr)
 require(`lunr-languages/lunr.multi`)(elasticlunr)
-require(`lunr-languages/lunr.ru`)(elasticlunr)
+
+const lunrLanguages = {
+  da: require(`lunr-languages/lunr.da`),
+  de: require(`lunr-languages/lunr.de`),
+  du: require(`lunr-languages/lunr.du`),
+  es: require(`lunr-languages/lunr.es`),
+  fi: require(`lunr-languages/lunr.fi`),
+  fr: require(`lunr-languages/lunr.fr`),
+  hu: require(`lunr-languages/lunr.hu`),
+  it: require(`lunr-languages/lunr.it`),
+  jp: require(`lunr-languages/lunr.jp`),
+  no: require(`lunr-languages/lunr.no`),
+  pt: require(`lunr-languages/lunr.pt`),
+  ro: require(`lunr-languages/lunr.ro`),
+  ru: require(`lunr-languages/lunr.ru`),
+  sv: require(`lunr-languages/lunr.sv`),
+  tr: require(`lunr-languages/lunr.tr`),
+}
 
 const SEARCH_INDEX_ID = `SearchIndex < Site`
 const SEARCH_INDEX_TYPE = `SiteSearchIndex`
@@ -48,7 +65,7 @@ const createOrGetIndex = async (
   getNodesByType,
   getNodes,
   server,
-  { fields, resolvers }
+  { fields, resolvers, languages }
 ) => {
   const cacheKey = `${node.id}:index`
   const cached = await cache.get(cacheKey)
@@ -57,7 +74,16 @@ const createOrGetIndex = async (
   }
 
   const index = elasticlunr(function() {
-    this.use(elasticlunr.multiLanguage(`en`, `ru`))
+    if (languages && languages.length) {
+      const filteredLanguages = filterLanguagesOption(languages)
+      for (let i = 0; i < filteredLanguages.length; i++) {
+        const lang = filteredLanguages[i]
+        if (lunrLanguages[lang] && lang !== `en`) {
+          lunrLanguages[lang](elasticlunr)
+        }
+      }
+      this.use(elasticlunr.multiLanguage.apply(this, filteredLanguages))
+    }
   })
   index.setRef(`id`)
   fields.forEach(field => index.addField(field))
@@ -105,6 +131,24 @@ const SearchIndex = new GraphQLScalarType({
     throw new Error(`Not supported`)
   },
 })
+
+const filterLanguagesOption = languages => {
+  const filtered = []
+  for (let i = 0; i < languages.length; i++) {
+    const lang = languages[i]
+    const lowercaseLang = lang.toLowerCase()
+    const supportedLanguages = Object.keys(lunrLanguages)
+    supportedLanguages.push(`en`)
+    if (supportedLanguages.indexOf(lowercaseLang) !== -1) {
+      filtered.push(lowercaseLang)
+    } else {
+      console.log(
+        `⚠️ @gatsby-contrib/gatsby-plugin-elasticlunr-search - ${lowercaseLang} is not supported`
+      )
+    }
+  }
+  return filtered
+}
 
 exports.sourceNodes = async ({ getNodes, actions }) => {
   const { touchNode } = actions
